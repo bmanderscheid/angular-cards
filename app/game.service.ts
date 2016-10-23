@@ -28,7 +28,7 @@ export class GameService {
     }
 
     drawCard(): Card {
-        var cardIndex:number = Math.floor(Math.random() * (this._gameDeck.length - 1);
+        var cardIndex:number = Math.floor(Math.random() * (this._gameDeck.length - 1));
         var card:Card = this._gameDeck[cardIndex];
         this._gameDeck.splice(cardIndex,1); 
         console.log(this._gameDeck.length);
