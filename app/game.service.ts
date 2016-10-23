@@ -3,23 +3,40 @@ import { Http } from '@angular/http';
 
 import 'rxjs/add/operator/toPromise';
 
+import { Card } from '../app/card.model'
 import { CardService } from '../app/card.service'
 
 @Injectable()
 export class GameService {
 
-    private CARD_DATA_URL:string = '../assets/data/cards.json';
+    private _gameDeck: Card[];
 
-    constructor(private http: Http) { }
+    constructor(private http: Http, private cardService: CardService) { }
 
-    private initServices():void{
-        
+    initServices(): void {
+        // how do I tell the component that I'm ready?
+        this.cardService.loadCardData()
+            .then(cards => {
+                this._gameDeck = cards;                
+            })
+            .catch(this.handleError);
     }
 
-    loadCardData() {
-        return this.http.get(this.CARD_DATA_URL)
-            .toPromise()
-            .then(response => response.json().cards as Card[])
+    private handleError(error: any) {
+        console.error('An error occurred', error); // for demo purposes only
+        return false;
+    }
+
+    drawCard(): Card {
+        var cardIndex:number = Math.floor(Math.random() * (this._gameDeck.length - 1);
+        var card:Card = this._gameDeck[cardIndex];
+        this._gameDeck.splice(cardIndex,1); 
+        console.log(this._gameDeck.length);
+        return card;
+    }
+
+    get gameDeck():Card[]{
+        return this._gameDeck;
     }
 
 }

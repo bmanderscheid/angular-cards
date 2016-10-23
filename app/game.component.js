@@ -33,15 +33,11 @@ var GameComponent = (function () {
         this._loader.load(function () { return _this.assetsLoaded(); });
     };
     GameComponent.prototype.assetsLoaded = function () {
-        this.loadGameData();
+        this.initServices();
     };
-    GameComponent.prototype.loadGameData = function () {
-        var _this = this;
-        this._gameService.loadCardData()
-            .then(function (cards) {
-            _this._cards = cards;
-            _this.gameReady();
-        });
+    GameComponent.prototype.initServices = function () {
+        this._gameService.initServices();
+        this.gameReady();
     };
     GameComponent.prototype.gameReady = function () {
         var cardBack = new PIXI.Sprite(PIXI.Texture.fromFrame("back"));
@@ -58,7 +54,7 @@ var GameComponent = (function () {
     };
     // GAME CONTROL
     GameComponent.prototype.drawCard = function () {
-        var card = this._cards[Math.floor(Math.random() * 52)];
+        var card = this._gameService.drawCard();
         var frame = PIXI.Texture.fromFrame(card.texture);
         var sprite = new PIXI.Sprite(frame);
         sprite.anchor.set(.5, .5);

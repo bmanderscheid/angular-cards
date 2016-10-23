@@ -16,8 +16,6 @@ export class GameComponent implements OnInit {
     private FRAME_RATE: number;
     private DECK_POS: PIXI.Point;
 
-    private _cards: Card[];
-
 
     constructor(private _gameService: GameService) {
         this.FRAME_RATE = 1000 / 60;
@@ -43,15 +41,12 @@ export class GameComponent implements OnInit {
     }
 
     private assetsLoaded(): void {
-        this.loadGameData();
+        this.initServices();
     }
 
-    private loadGameData(): void {
-        this._gameService.loadCardData()
-            .then(cards => {
-                this._cards = cards;
-                this.gameReady();
-            });
+    private initServices(): void {
+        this._gameService.initServices();
+        this.gameReady();        
     }
 
     private gameReady(): void {
@@ -71,7 +66,7 @@ export class GameComponent implements OnInit {
     // GAME CONTROL
 
     private drawCard(): void {
-        let card: Card = this._cards[Math.floor(Math.random() * 52)];
+        let card: Card = this._gameService.drawCard();
         let frame: PIXI.Texture = PIXI.Texture.fromFrame(card.texture);
         let sprite: PIXI.Sprite = new PIXI.Sprite(frame);
         sprite.anchor.set(.5, .5);
