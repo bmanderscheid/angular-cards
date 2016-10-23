@@ -1,0 +1,320 @@
+{
+    "cards": [
+        {
+            "texture": "c01",
+            "values": [
+                1,
+                11
+            ]
+        },
+        {
+            "texture": "c02",
+            "values": [
+                2
+            ]
+        },
+        {
+            "texture": "c03",
+            "values": [
+                3
+            ]
+        },
+        {
+            "texture": "c04",
+            "values": [
+                4
+            ]
+        },
+        {
+            "texture": "c05",
+            "values": [
+                5
+            ]
+        },
+        {
+            "texture": "c06",
+            "values": [
+                6
+            ]
+        },
+        {
+            "texture": "c07",
+            "values": [
+                7
+            ]
+        },
+        {
+            "texture": "c08",
+            "values": [
+                8
+            ]
+        },
+        {
+            "texture": "c09",
+            "values": [
+                9
+            ]
+        },
+        {
+            "texture": "c10",
+            "values": [
+                10
+            ]
+        },
+        {
+            "texture": "c11",
+            "values": [
+                11
+            ]
+        },
+        {
+            "texture": "c12",
+            "values": [
+                12
+            ]
+        },
+        {
+            "texture": "c13",
+            "values": [
+                13
+            ]
+        },
+        {
+            "texture": "s01",
+            "values": [
+                1,
+                11
+            ]
+        },
+        {
+            "texture": "s02",
+            "values": [
+                2
+            ]
+        },
+        {
+            "texture": "s03",
+            "values": [
+                3
+            ]
+        },
+        {
+            "texture": "s04",
+            "values": [
+                4
+            ]
+        },
+        {
+            "texture": "s05",
+            "values": [
+                5
+            ]
+        },
+        {
+            "texture": "s06",
+            "values": [
+                6
+            ]
+        },
+        {
+            "texture": "s07",
+            "values": [
+                7
+            ]
+        },
+        {
+            "texture": "s08",
+            "values": [
+                8
+            ]
+        },
+        {
+            "texture": "s09",
+            "values": [
+                9
+            ]
+        },
+        {
+            "texture": "s10",
+            "values": [
+                10
+            ]
+        },
+        {
+            "texture": "s11",
+            "values": [
+                11
+            ]
+        },
+        {
+            "texture": "s12",
+            "values": [
+                12
+            ]
+        },
+        {
+            "texture": "s13",
+            "values": [
+                13
+            ]
+        },
+        {
+            "texture": "h01",
+            "values": [
+                1,
+                11
+            ]
+        },
+        {
+            "texture": "h02",
+            "values": [
+                2
+            ]
+        },
+        {
+            "texture": "h03",
+            "values": [
+                3
+            ]
+        },
+        {
+            "texture": "h04",
+            "values": [
+                4
+            ]
+        },
+        {
+            "texture": "h05",
+            "values": [
+                5
+            ]
+        },
+        {
+            "texture": "h06",
+            "values": [
+                6
+            ]
+        },
+        {
+            "texture": "h07",
+            "values": [
+                7
+            ]
+        },
+        {
+            "texture": "h08",
+            "values": [
+                8
+            ]
+        },
+        {
+            "texture": "h09",
+            "values": [
+                9
+            ]
+        },
+        {
+            "texture": "h10",
+            "values": [
+                10
+            ]
+        },
+        {
+            "texture": "h11",
+            "values": [
+                11
+            ]
+        },
+        {
+            "texture": "h12",
+            "values": [
+                12
+            ]
+        },
+        {
+            "texture": "h13",
+            "values": [
+                13
+            ]
+        },
+        {
+            "texture": "d01",
+            "values": [
+                1,
+                11
+            ]
+        },
+        {
+            "texture": "d02",
+            "values": [
+                2
+            ]
+        },
+        {
+            "texture": "d03",
+            "values": [
+                3
+            ]
+        },
+        {
+            "texture": "d04",
+            "values": [
+                4
+            ]
+        },
+        {
+            "texture": "d05",
+            "values": [
+                5
+            ]
+        },
+        {
+            "texture": "d06",
+            "values": [
+                6
+            ]
+        },
+        {
+            "texture": "d07",
+            "values": [
+                7
+            ]
+        },
+        {
+            "texture": "d08",
+            "values": [
+                8
+            ]
+        },
+        {
+            "texture": "d09",
+            "values": [
+                9
+            ]
+        },
+        {
+            "texture": "d10",
+            "values": [
+                10
+            ]
+        },
+        {
+            "texture": "d11",
+            "values": [
+                11
+            ]
+        },
+        {
+            "texture": "d12",
+            "values": [
+                12
+            ]
+        },
+        {
+            "texture": "d13",
+            "values": [
+                13
+            ]
+        }
+    ]
+}

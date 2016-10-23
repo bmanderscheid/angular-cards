@@ -9,17 +9,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var AppComponent = (function () {
-    function AppComponent() {
+var http_1 = require('@angular/http');
+require('rxjs/add/operator/toPromise');
+var GameService = (function () {
+    function GameService(http) {
+        this.http = http;
+        this.CARD_DATA_URL = '../assets/data/cards.json';
     }
-    AppComponent = __decorate([
-        core_1.Component({
-            selector: 'my-app',
-            template: '<h1>Angular and Canvas Games</h1><game></game>'
-        }), 
-        __metadata('design:paramtypes', [])
-    ], AppComponent);
-    return AppComponent;
+    GameService.prototype.initServices = function () {
+    };
+    GameService.prototype.loadCardData = function () {
+        return this.http.get(this.CARD_DATA_URL)
+            .toPromise()
+            .then(function (response) { return response.json().cards; });
+    };
+    GameService = __decorate([
+        core_1.Injectable(), 
+        __metadata('design:paramtypes', [http_1.Http])
+    ], GameService);
+    return GameService;
 }());
-exports.AppComponent = AppComponent;
-//# sourceMappingURL=app.component.js.map
+exports.GameService = GameService;
+//# sourceMappingURL=game.service.js.map
