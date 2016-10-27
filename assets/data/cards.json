@@ -64,19 +64,19 @@
         {
             "texture": "c11",
             "values": [
-                11
+                10
             ]
         },
         {
             "texture": "c12",
             "values": [
-                12
+                10
             ]
         },
         {
             "texture": "c13",
             "values": [
-                13
+                10
             ]
         },
         {
@@ -143,19 +143,19 @@
         {
             "texture": "s11",
             "values": [
-                11
+                10
             ]
         },
         {
             "texture": "s12",
             "values": [
-                12
+                10
             ]
         },
         {
             "texture": "s13",
             "values": [
-                13
+                10
             ]
         },
         {
@@ -222,19 +222,19 @@
         {
             "texture": "h11",
             "values": [
-                11
+                10
             ]
         },
         {
             "texture": "h12",
             "values": [
-                12
+                10
             ]
         },
         {
             "texture": "h13",
             "values": [
-                13
+                10
             ]
         },
         {
@@ -301,19 +301,19 @@
         {
             "texture": "d11",
             "values": [
-                11
+                10
             ]
         },
         {
             "texture": "d12",
             "values": [
-                12
+                10
             ]
         },
         {
             "texture": "d13",
             "values": [
-                13
+                10
             ]
         }
     ]

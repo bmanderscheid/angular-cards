@@ -10,36 +10,113 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var http_1 = require('@angular/http');
+var BehaviorSubject_1 = require('rxjs/BehaviorSubject');
 require('rxjs/add/operator/toPromise');
 var card_service_1 = require('../app/card.service');
+var game_values_1 = require('../app/game-values');
 var GameService = (function () {
     function GameService(http, cardService) {
         this.http = http;
         this.cardService = cardService;
+        this._hand = [];
+        this._dealerHand = [];
+        this._disableMoves = false;
+        this._playerSubject = new BehaviorSubject_1.BehaviorSubject(game_values_1.Player.PLAYER);
+        this._currentPlayer = this._playerSubject.asObservable();
     }
     GameService.prototype.initServices = function () {
         var _this = this;
-        // how do I tell the component that I'm ready?
+        // figure out how to return promise to game component so it can start render
         this.cardService.loadCardData()
             .then(function (cards) {
             _this._gameDeck = cards;
+            _this.dealCards();
         })
             .catch(this.handleError);
     };
     GameService.prototype.handleError = function (error) {
-        console.error('An error occurred', error); // for demo purposes only
-        return false;
+        console.error('An error occurred', error); // lazy        
     };
-    GameService.prototype.drawCard = function () {
+    GameService.prototype.dealCards = function () {
+        var _this = this;
+        var hand;
+        var i = 0;
+        var hiddenCardIndex = 1;
+        var int = setInterval(function () {
+            if (i == 3)
+                clearInterval(int);
+            hand = i % 2 == 0 ? _this._hand : _this._dealerHand;
+            var cardIndex = Math.floor(Math.random() * (_this._gameDeck.length - 1));
+            var card = _this._gameDeck[cardIndex];
+            card.player = i % 2 == 0 ? game_values_1.Player.PLAYER : game_values_1.Player.DEALER;
+            card.flipped = i == hiddenCardIndex;
+            _this._gameDeck.splice(cardIndex, 1);
+            hand.push(card);
+            i++;
+        }, 500);
+    };
+    GameService.prototype.hitCard = function () {
+        if (this._disableMoves)
+            return;
+        var hand = this._playerSubject.value == game_values_1.Player.PLAYER ? this._hand : this._dealerHand;
         var cardIndex = Math.floor(Math.random() * (this._gameDeck.length - 1));
         var card = this._gameDeck[cardIndex];
         this._gameDeck.splice(cardIndex, 1);
-        console.log(this._gameDeck.length);
-        return card;
+        card.player = this._playerSubject.value;
+        hand.push(card);
+        this._disableMoves = true;
+    };
+    GameService.prototype.evaluateHand = function () {
+        if (this.countCardPoints() < 21) {
+            this._disableMoves = false;
+            return true;
+        }
+        return false;
+    };
+    GameService.prototype.countCardPoints = function () {
+        return this._hand.reduce(function (a, b) {
+            return a + b.values[0];
+        }, 0);
+    };
+    GameService.prototype.dealerGo = function () {
+        this._playerSubject.next(game_values_1.Player.DEALER);
+    };
+    GameService.prototype.getCardModelByIndex = function (player, index) {
+        var hand = player == game_values_1.Player.PLAYER ? this._hand : this._dealerHand;
+        return hand[index];
     };
     Object.defineProperty(GameService.prototype, "gameDeck", {
+        //get set
         get: function () {
             return this._gameDeck;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GameService.prototype, "hand", {
+        get: function () {
+            return this._hand;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GameService.prototype, "dealerHand", {
+        get: function () {
+            return this._dealerHand;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GameService.prototype, "handPoints", {
+        get: function () {
+            return this._handPoints;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GameService.prototype, "currentPlayer", {
+        get: function () {
+            return this._currentPlayer;
         },
         enumerable: true,
         configurable: true

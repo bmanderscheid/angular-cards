@@ -13,6 +13,7 @@ var http_1 = require('@angular/http');
 var platform_browser_1 = require('@angular/platform-browser');
 var app_component_1 = require('./app.component');
 var game_component_1 = require('./game.component');
+var player_info_component_1 = require('./player-info.component');
 var game_service_1 = require('./game.service');
 var card_service_1 = require('./card.service');
 var AppModule = (function () {
@@ -21,7 +22,7 @@ var AppModule = (function () {
     AppModule = __decorate([
         core_1.NgModule({
             imports: [platform_browser_1.BrowserModule, http_1.HttpModule],
-            declarations: [app_component_1.AppComponent, game_component_1.GameComponent],
+            declarations: [app_component_1.AppComponent, game_component_1.GameComponent, player_info_component_1.PlayerInfoComponent],
             bootstrap: [app_component_1.AppComponent],
             providers: [game_service_1.GameService, card_service_1.CardService]
         }), 

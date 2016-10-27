@@ -15,7 +15,7 @@ var AppComponent = (function () {
     AppComponent = __decorate([
         core_1.Component({
             selector: 'my-app',
-            template: '<h1>Angular and Canvas Games</h1><game></game>'
+            template: "'<h1>Angular and Canvas Games</h1>\n            <game></game>'\n            <player></player>"
         }), 
         __metadata('design:paramtypes', [])
     ], AppComponent);
