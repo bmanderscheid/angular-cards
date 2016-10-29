@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var card_sprite_1 = require('../app/card.sprite');
 var game_values_1 = require('../app/game-values');
 var game_service_1 = require('../app/game.service');
 var GameComponent = (function () {
@@ -21,9 +22,13 @@ var GameComponent = (function () {
         this.DEALER_Y = 200;
         this.PLAYER_Y = 400;
         this.FRAME_RATE = 1000 / 60;
-        this._hand = [];
+        this._playerHand = [];
         this._dealerHand = [];
-        this._gameService.currentPlayer.subscribe(function (newValue) { _this.changePlayer(newValue); });
+        this._gameService.currentPlayer.subscribe(function (newValue) { _this.playerChanged(newValue); });
+        this._gameService.hand.subscribe(function (hand) {
+            _this._allCards = hand;
+            _this.update();
+        });
     }
     GameComponent.prototype.ngOnInit = function () {
         this.preparePIXI();
@@ -48,52 +53,47 @@ var GameComponent = (function () {
         this.gameReady();
     };
     GameComponent.prototype.gameReady = function () {
-        var cardBack = new PIXI.Sprite(PIXI.Texture.fromFrame("back"));
+        var texture = PIXI.Texture.fromFrame("back");
+        var cardBack = new PIXI.Sprite(texture);
         cardBack.anchor.set(.5, .5);
         cardBack.position.set(this.DECK_POS.x, this.DECK_POS.y);
         this._stage.addChild(cardBack);
         this._renderer.render(this._stage); // render initial sprites        
-        this.startGameLoop();
-    };
-    GameComponent.prototype.startGameLoop = function () {
-        var _this = this;
-        setInterval(function () {
-            _this.update();
-            _this.render();
-        }, this.FRAME_RATE);
     };
     GameComponent.prototype.update = function () {
-        for (var _i = 0, _a = this._gameService.hand; _i < _a.length; _i++) {
+        for (var _i = 0, _a = this._allCards; _i < _a.length; _i++) {
             var c = _a[_i];
             if (!c.rendered) {
                 this.addCardToHand(c);
             }
         }
-        for (var _b = 0, _c = this._gameService.dealerHand; _b < _c.length; _b++) {
-            var c = _c[_b];
-            if (!c.rendered) {
-                this.addCardToHand(c);
-            }
-        }
+        this.render();
     };
     GameComponent.prototype.render = function () {
-        this.renderHand();
-        this.renderDealerHand();
+        if (!this._renderer)
+            return;
+        this.renderCards();
+    };
+    GameComponent.prototype.renderCanvas = function () {
         this._renderer.render(this._stage);
     };
-    GameComponent.prototype.renderHand = function () {
-        if (this._hand.length < 1)
+    GameComponent.prototype.renderCards = function () {
+        this.renderPlayerCards();
+        this.renderDealerCards();
+    };
+    GameComponent.prototype.renderPlayerCards = function () {
+        if (this._playerHand.length < 1)
             return;
         var stageCenter = 512;
-        var widthOfHand = this._hand.length * this._hand[0].width;
-        var xPos = stageCenter - (widthOfHand / 2) + (this._hand[0].width / 2);
-        for (var _i = 0, _a = this._hand; _i < _a.length; _i++) {
+        var widthOfHand = this._playerHand.length * this._playerHand[0].width;
+        var xPos = stageCenter - (widthOfHand / 2) + (this._playerHand[0].width / 2);
+        for (var _i = 0, _a = this._playerHand; _i < _a.length; _i++) {
             var c = _a[_i];
-            TweenLite.to(c, this.MOVE_DELAY, { x: xPos, y: this.PLAYER_Y, rotation: 180 * (Math.PI / 180) });
+            TweenLite.to(c, this.MOVE_DELAY, { onUpdate: this.renderCanvas, onUpdateScope: this, x: xPos, y: this.PLAYER_Y, rotation: 180 * (Math.PI / 180) });
             xPos += c.width;
         }
     };
-    GameComponent.prototype.renderDealerHand = function () {
+    GameComponent.prototype.renderDealerCards = function () {
         if (this._dealerHand.length < 1)
             return;
         var stageCenter = 512;
@@ -101,15 +101,15 @@ var GameComponent = (function () {
         var xPos = stageCenter - (widthOfHand / 2) + (this._dealerHand[0].width / 2);
         for (var _i = 0, _a = this._dealerHand; _i < _a.length; _i++) {
             var c = _a[_i];
-            TweenLite.to(c, this.MOVE_DELAY, { x: xPos, y: this.DEALER_Y, rotation: 180 * (Math.PI / 180) });
+            TweenLite.to(c, this.MOVE_DELAY, { onUpdate: this.renderCanvas, onUpdateScope: this, x: xPos, y: this.DEALER_Y, rotation: 180 * (Math.PI / 180) });
             xPos += c.width;
         }
     };
     GameComponent.prototype.addCardToHand = function (cardModel) {
-        var hand = cardModel.player == game_values_1.Player.PLAYER ? this._hand : this._dealerHand;
-        var texture = cardModel.flipped ? "back" : cardModel.texture;
-        var sprite = new PIXI.Sprite(PIXI.Texture.fromFrame(texture));
-        sprite.texture = PIXI.Texture.fromFrame(texture);
+        var hand = cardModel.player == game_values_1.Player.DEALER ? this._dealerHand : this._playerHand;
+        //let texture: string = cardModel.flipped ? "back" : cardModel.texture;
+        var sprite = new card_sprite_1.CardSprite(cardModel);
+        sprite.render(cardModel);
         sprite.anchor.set(.5, .5);
         sprite.position.set(this.DECK_POS.x, this.DECK_POS.y);
         hand.push(sprite);
@@ -122,15 +122,11 @@ var GameComponent = (function () {
             alert("BUSTED");
         }
     };
-    GameComponent.prototype.changePlayer = function (player) {
-        console.log("change player");
-        if (player == game_values_1.Player.PLAYER)
-            return;
-        //flip dealers hand
-        var cardModel = this._gameService.getCardModelByIndex(game_values_1.Player.DEALER, 0);
-        var texture = PIXI.Texture.fromFrame(cardModel.texture);
-        this._dealerHand[0].texture = texture;
-        console.log(cardModel);
+    GameComponent.prototype.playerChanged = function (player) {
+        if (player == game_values_1.Player.DEALER) {
+            this._dealerHand[0].flip();
+            this.renderCanvas();
+        }
     };
     GameComponent = __decorate([
         core_1.Component({

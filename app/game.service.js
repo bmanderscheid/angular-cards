@@ -18,11 +18,12 @@ var GameService = (function () {
     function GameService(http, cardService) {
         this.http = http;
         this.cardService = cardService;
-        this._hand = [];
-        this._dealerHand = [];
+        this._gameDeck = [];
         this._disableMoves = false;
-        this._playerSubject = new BehaviorSubject_1.BehaviorSubject(game_values_1.Player.PLAYER);
-        this._currentPlayer = this._playerSubject.asObservable();
+        this._currentPlayerSource = new BehaviorSubject_1.BehaviorSubject(game_values_1.Player.PLAYER);
+        this._currentPlayer = this._currentPlayerSource.asObservable();
+        this._handSource = new BehaviorSubject_1.BehaviorSubject([]);
+        this._hand = this._handSource.asObservable();
     }
     GameService.prototype.initServices = function () {
         var _this = this;
@@ -45,64 +46,90 @@ var GameService = (function () {
         var int = setInterval(function () {
             if (i == 3)
                 clearInterval(int);
-            hand = i % 2 == 0 ? _this._hand : _this._dealerHand;
-            var cardIndex = Math.floor(Math.random() * (_this._gameDeck.length - 1));
-            var card = _this._gameDeck[cardIndex];
+            var card = _this.drawCard();
             card.player = i % 2 == 0 ? game_values_1.Player.PLAYER : game_values_1.Player.DEALER;
             card.flipped = i == hiddenCardIndex;
-            _this._gameDeck.splice(cardIndex, 1);
-            hand.push(card);
+            _this._handSource.value.push(card);
+            _this._handSource.next(_this._handSource.value);
             i++;
         }, 500);
     };
     GameService.prototype.hitCard = function () {
-        if (this._disableMoves)
-            return;
-        var hand = this._playerSubject.value == game_values_1.Player.PLAYER ? this._hand : this._dealerHand;
+        //if (this._disableMoves) return;
+        var card = this.drawCard();
+        card.player = this._currentPlayerSource.value;
+        this._handSource.value.push(card);
+        this._handSource.next(this._handSource.value);
+        this.evaluateHand();
+        //this._disableMoves = true;
+    };
+    //move to card service
+    GameService.prototype.drawCard = function () {
         var cardIndex = Math.floor(Math.random() * (this._gameDeck.length - 1));
         var card = this._gameDeck[cardIndex];
         this._gameDeck.splice(cardIndex, 1);
-        card.player = this._playerSubject.value;
-        hand.push(card);
-        this._disableMoves = true;
+        return card;
     };
     GameService.prototype.evaluateHand = function () {
-        if (this.countCardPoints() < 21) {
-            this._disableMoves = false;
-            return true;
+        if (this._currentPlayerSource.value == game_values_1.Player.DEALER) {
+            this.evaluateDealer();
         }
-        return false;
+        else {
+            this.evaluatePlayer();
+        }
     };
-    GameService.prototype.countCardPoints = function () {
-        return this._hand.reduce(function (a, b) {
+    GameService.prototype.evaluateDealer = function () {
+        var _this = this;
+        var points = this.countPlayerPoints(game_values_1.Player.DEALER);
+        if (points < 16) {
+            TweenLite.delayedCall(1, function () { return _this.hitCard(); });
+        }
+        else if (points >= 16 && points <= 21) {
+            this.gameOver();
+        }
+        else if (points > 21) {
+            alert("dealer busted");
+        }
+    };
+    GameService.prototype.evaluatePlayer = function () {
+    };
+    GameService.prototype.countPlayerPoints = function (player) {
+        var hand = this._handSource.value.filter(function (card) { return card.player == player; });
+        return hand.reduce(function (a, b) {
             return a + b.values[0];
         }, 0);
     };
     GameService.prototype.dealerGo = function () {
-        this._playerSubject.next(game_values_1.Player.DEALER);
+        this._handSource.value[0].flipped = false;
+        this._currentPlayerSource.next(game_values_1.Player.DEALER);
+        var delaerPoints = this.countPlayerPoints(game_values_1.Player.DEALER);
+        this.evaluateHand();
     };
     GameService.prototype.getCardModelByIndex = function (player, index) {
-        var hand = player == game_values_1.Player.PLAYER ? this._hand : this._dealerHand;
+        var hand = player == game_values_1.Player.PLAYER ? this._gameDeck : this._dealerHand;
         return hand[index];
     };
-    Object.defineProperty(GameService.prototype, "gameDeck", {
+    GameService.prototype.gameOver = function () {
+        var _this = this;
+        TweenLite.delayedCall(1, function () { return _this.evaluateGame(); });
+    };
+    GameService.prototype.evaluateGame = function () {
+        var playerPoints = this.countPlayerPoints(game_values_1.Player.PLAYER);
+        var dealerPoints = this.countPlayerPoints(game_values_1.Player.DEALER);
+        if (playerPoints > dealerPoints) {
+            alert("player wins");
+        }
+        else if (dealerPoints > playerPoints) {
+            alert("dealer wins");
+        }
+        else {
+            alert("draw");
+        }
+    };
+    Object.defineProperty(GameService.prototype, "hand", {
         //get set
         get: function () {
-            return this._gameDeck;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GameService.prototype, "hand", {
-        get: function () {
             return this._hand;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GameService.prototype, "dealerHand", {
-        get: function () {
-            return this._dealerHand;
         },
         enumerable: true,
         configurable: true

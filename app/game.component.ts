@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { Card } from '../app/card.model'
+import { CardSprite } from '../app/card.sprite';
 import { Player } from '../app/game-values'
 import { GameService } from '../app/game.service'
 
@@ -14,8 +15,10 @@ export class GameComponent implements OnInit {
     private _renderer: PIXI.SystemRenderer;
     private _loader: PIXI.loaders.Loader;
 
-    private _hand: PIXI.Sprite[];
-    private _dealerHand: PIXI.Sprite[];
+    private _allCards: Card[];
+
+    private _playerHand: CardSprite[];
+    private _dealerHand: CardSprite[];
 
     private FRAME_RATE: number;
     private MOVE_DELAY: number = .3; //how long a move takes to animate
@@ -28,9 +31,13 @@ export class GameComponent implements OnInit {
 
     constructor(private _gameService: GameService) {
         this.FRAME_RATE = 1000 / 60;
-        this._hand = [];
+        this._playerHand = [];
         this._dealerHand = [];
-        this._gameService.currentPlayer.subscribe((newValue: Player) => { this.changePlayer(newValue) });
+        this._gameService.currentPlayer.subscribe((newValue: Player) => { this.playerChanged(newValue) });
+        this._gameService.hand.subscribe((hand: Card[]) => {
+            this._allCards = hand;
+            this.update();
+        });
     }
 
     ngOnInit() {
@@ -60,67 +67,64 @@ export class GameComponent implements OnInit {
     }
 
     private gameReady(): void {
-        let cardBack: PIXI.Sprite = new PIXI.Sprite(PIXI.Texture.fromFrame("back"));
+        let texture = PIXI.Texture.fromFrame("back")
+        let cardBack: PIXI.Sprite = new PIXI.Sprite(texture);
         cardBack.anchor.set(.5, .5);
         cardBack.position.set(this.DECK_POS.x, this.DECK_POS.y);
         this._stage.addChild(cardBack);
         this._renderer.render(this._stage); // render initial sprites        
-        this.startGameLoop();
-    }
-
-    private startGameLoop(): void {
-        setInterval(() => {
-            this.update();
-            this.render();
-        }, this.FRAME_RATE)
     }
 
     private update(): void {
-        for (let c of this._gameService.hand) {
+        for (let c of this._allCards) {
             if (!c.rendered) {
                 this.addCardToHand(c);
             }
         }
-        for (let c of this._gameService.dealerHand) {
-            if (!c.rendered) {
-                this.addCardToHand(c);
-            }
-        }
+        this.render();
     }
 
     private render(): void {
-        this.renderHand();
-        this.renderDealerHand();
+        if (!this._renderer) return;
+        this.renderCards();
+    }
+
+    private renderCanvas(): void {
         this._renderer.render(this._stage);
     }
 
-    private renderHand(): void {
-        if (this._hand.length < 1) return;
+    private renderCards(): void {        
+        this.renderPlayerCards();
+        this.renderDealerCards();
+    }
+
+    private renderPlayerCards(): void {
+        if (this._playerHand.length < 1) return;
         let stageCenter: number = 512;
-        let widthOfHand: number = this._hand.length * this._hand[0].width;
-        let xPos = stageCenter - (widthOfHand / 2) + (this._hand[0].width / 2);
-        for (let c of this._hand) {
-            TweenLite.to(c, this.MOVE_DELAY, { x: xPos, y: this.PLAYER_Y, rotation: 180 * (Math.PI / 180) });
+        let widthOfHand: number = this._playerHand.length * this._playerHand[0].width;
+        let xPos = stageCenter - (widthOfHand / 2) + (this._playerHand[0].width / 2);        
+        for (let c of this._playerHand) {
+            TweenLite.to(c, this.MOVE_DELAY, { onUpdate: this.renderCanvas, onUpdateScope: this, x: xPos, y: this.PLAYER_Y, rotation: 180 * (Math.PI / 180) });
             xPos += c.width;
         }
     }
-
-    private renderDealerHand(): void {
+    
+    private renderDealerCards(): void {
         if (this._dealerHand.length < 1) return;
         let stageCenter: number = 512;
         let widthOfHand: number = this._dealerHand.length * this._dealerHand[0].width;
-        let xPos = stageCenter - (widthOfHand / 2) + (this._dealerHand[0].width / 2);
+        let xPos = stageCenter - (widthOfHand / 2) + (this._dealerHand[0].width / 2);        
         for (let c of this._dealerHand) {
-            TweenLite.to(c, this.MOVE_DELAY, { x: xPos, y: this.DEALER_Y, rotation: 180 * (Math.PI / 180) });
+            TweenLite.to(c, this.MOVE_DELAY, { onUpdate: this.renderCanvas, onUpdateScope: this, x: xPos, y: this.DEALER_Y, rotation: 180 * (Math.PI / 180) });
             xPos += c.width;
         }
     }
 
     private addCardToHand(cardModel: Card): void {
-        let hand: PIXI.Sprite[] = cardModel.player == Player.PLAYER ? this._hand : this._dealerHand;        
-        let texture: string = cardModel.flipped ? "back" : cardModel.texture;
-        let sprite: PIXI.Sprite = new PIXI.Sprite(PIXI.Texture.fromFrame(texture));        
-        sprite.texture = PIXI.Texture.fromFrame(texture);
+        let hand: CardSprite[] = cardModel.player == Player.DEALER ? this._dealerHand : this._playerHand;
+        //let texture: string = cardModel.flipped ? "back" : cardModel.texture;
+        let sprite: CardSprite = new CardSprite(cardModel);
+        sprite.render(cardModel);
         sprite.anchor.set(.5, .5);
         sprite.position.set(this.DECK_POS.x, this.DECK_POS.y);
         hand.push(sprite);
@@ -135,14 +139,11 @@ export class GameComponent implements OnInit {
         }
     }
 
-    private changePlayer(player: Player): void {
-        console.log("change player");
-        if(player == Player.PLAYER)return;
-        //flip dealers hand
-        let cardModel: Card = this._gameService.getCardModelByIndex(Player.DEALER, 0);
-        let texture: PIXI.Texture = PIXI.Texture.fromFrame(cardModel.texture);
-        this._dealerHand[0].texture = texture;
-        console.log(cardModel)
+    private playerChanged(player: Player): void {        
+        if (player == Player.DEALER){
+            this._dealerHand[0].flip();
+            this.renderCanvas();
+        }
     }
 
 }
